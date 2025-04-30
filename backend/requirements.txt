@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+pandas
+qdrant-client
+python-multipart
+sentence-transformers
+celery
+redis
+websockets

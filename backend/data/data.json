@@ -1,0 +1,10 @@
+[
+    {
+        "content": "這是一段測試文本",
+        "source": "test_source"
+    },
+    {
+        "content": "另一段知識庫內容",
+        "source": "test_source"
+    }
+]

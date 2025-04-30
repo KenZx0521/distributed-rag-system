@@ -1,0 +1,11 @@
+.spinner {
+    font-size: 18px;
+    color: #333;
+    text-align: center;
+  }
+
+@media (max-width: 600px) {
+  input {
+    width: 100%;
+  }
+}
