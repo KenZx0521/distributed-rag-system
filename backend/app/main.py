@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .api.upload import router as upload_router
 from .api.query import router as query_router
 from .api.task_manager import router as task_manager_router
+from .api.node_monitor import router as node_monitor_router
 import logging
 
 # 配置日誌
@@ -26,6 +27,7 @@ app.add_middleware(
 app.include_router(upload_router, prefix="/api")
 app.include_router(query_router, prefix="/api")
 app.include_router(task_manager_router, prefix="/api")
+app.include_router(node_monitor_router, prefix="/api")
 
 @app.get("/")
 async def root():

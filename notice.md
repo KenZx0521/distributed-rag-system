@@ -12,3 +12,4 @@
 到backend啟動uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 http://localhost:8000/docs
 清理Redis：docker exec -it backend-redis-1 redis-cli DEL task_ids
+

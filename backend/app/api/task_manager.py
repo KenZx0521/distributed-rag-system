@@ -39,9 +39,11 @@ async def cancel_task(task_id: str):
         task = AsyncResult(task_id, app=celery_app)
         if task.state == "PENDING":
             task.revoke()
-            redis_client.srem('task_ids', task_id)  # 從 Redis 集合移除
+            redis_client.srem('task_ids', task_id)
+            logger.debug("任務 %s 已取消", task_id)
             return {"message": f"任務 {task_id} 已取消"}
         else:
+            logger.warning("無法取消任務 %s，當前狀態: %s", task_id, task.state)
             raise HTTPException(status_code=400, detail="僅能取消排隊中的任務")
     except Exception as e:
         logger.exception("取消任務失敗: %s", str(e))
@@ -50,7 +52,6 @@ async def cancel_task(task_id: str):
 @router.get("/tasks")
 async def list_tasks():
     try:
-        # 從 Redis 獲取所有任務 ID
         task_ids = redis_client.smembers('task_ids')
         tasks = []
         for task_id in task_ids:
@@ -64,17 +65,17 @@ async def list_tasks():
                 task_data["result"] = task.result if task.state == "SUCCESS" else None
                 task_data["error"] = task.info.get("error", None) if task.state == "FAILED" else None
             tasks.append(task_data)
+        logger.debug("返回任務列表，數量: %d", len(tasks))
         return {"tasks": tasks}
     except Exception as e:
         logger.exception("列出任務失敗: %s", str(e))
         raise HTTPException(status_code=500, detail=f"列出任務失敗: {str(e)}")
-    
+
 @router.websocket("/ws/tasks")
 async def websocket_tasks(websocket: WebSocket):
     await websocket.accept()
     try:
         while True:
-            # 獲取所有任務狀態
             task_ids = redis_client.smembers('task_ids')
             tasks = []
             for task_id in task_ids:
@@ -89,10 +90,10 @@ async def websocket_tasks(websocket: WebSocket):
                     task_data["error"] = task.info.get("error", None) if task.state == "FAILED" else None
                 tasks.append(task_data)
             
-            # 推送任務列表
+            logger.debug("WebSocket 推送任務列表，數量: %d，狀態: %s", 
+                        len(tasks), 
+                        {task["task_id"]: task["status"] for task in tasks})
             await websocket.send_text(json.dumps({"tasks": tasks}))
-            
-            # 每秒推送一次
             await asyncio.sleep(1)
     except Exception as e:
         logger.exception("WebSocket 錯誤: %s", str(e))

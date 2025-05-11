@@ -3,7 +3,9 @@ from .services.qdrant_client import QdrantService
 from .services.csv_processor import process_csv
 import os
 import redis
+import psutil
 import logging
+import json
 
 # 配置日誌
 logging.basicConfig(level=logging.DEBUG)
